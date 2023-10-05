@@ -1,26 +1,79 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react';
+import Autosuggest from 'react-autosuggest';
+import InputBase from '@mui/material/InputBase';
+import IconButton from '@mui/material/IconButton';
+import SearchIcon from '@mui/icons-material/Search';
+import Button from '@mui/material/Button';
+import Paper from '@mui/material/Paper';
 
+export default function Search({ searchTerm, handleBasicSearchChange, performSearch }) {
+  const [value, setValue] = useState(searchTerm);
+  const [suggestions, setSuggestions] = useState([]);
+  const [autos, setAutos] = useState([]);
 
+  // Cargar los datos del archivo JSON local (ajusta la ruta según tu estructura de archivos)
+  useEffect(() => {
+    fetch('/src/data/Cars.json')
+ // Ruta al archivo JSON local
+      .then((response) => response.json())
+      .then((data) => {
+        setAutos(data);
+      })
+      .catch((error) => {
+        console.error('Error al cargar los datos:', error);
+      });
+  }, []);
 
+  const getSuggestions = (value) => {
+    // Filtra las sugerencias basadas en el valor ingresado y en los datos cargados
+    return autos
+      .filter((auto) =>
+        auto.Name.toLowerCase().includes(value.toLowerCase())
+      )
+      .map((auto) => auto.Name);
+  };
 
+  const handleChange = (event, { newValue }) => {
+    setValue(newValue);
+  };
 
+  const handleSuggestionsFetchRequested = ({ value }) => {
+    setSuggestions(getSuggestions(value));
+  };
 
-export default function Search() {
-    return (
-    
-<form>   
-    <label for="default-search" class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
-    <div class="relative">
-        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
-            </svg>
-        </div>
-        <input type="search" id="default-search" class="block w-full p-4 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search Cars" required/>
-        <button type="submit" class="text-white absolute right-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Search</button>
-    </div>
-</form>
+  const handleSuggestionsClearRequested = () => {
+    setSuggestions([]);
+  };
 
-    )}
+  const handleSearchClick = () => {
+    // Manejar la búsqueda cuando se hace clic en el botón de búsqueda
+    handleBasicSearchChange(value);
+    performSearch();
+  };
 
- 
+  const inputProps = {
+    placeholder: 'Search Car',
+    value,
+    onChange: handleChange,
+  };
+
+  return (
+    <Paper component="form">
+      <Autosuggest
+        suggestions={suggestions}
+        onSuggestionsFetchRequested={handleSuggestionsFetchRequested}
+        onSuggestionsClearRequested={handleSuggestionsClearRequested}
+        getSuggestionValue={(suggestion) => suggestion}
+        renderSuggestion={(suggestion) => <div>{suggestion}</div>}
+        inputProps={inputProps}
+      />
+
+      <Button disabled>Clear</Button>
+
+      {/* Maneja la búsqueda cuando se hace clic en el botón */}
+      <IconButton type="button" aria-label="search" onClick={handleSearchClick}>
+        <SearchIcon />
+      </IconButton>
+    </Paper>
+  );
+}
