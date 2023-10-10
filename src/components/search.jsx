@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Autosuggest from 'react-autosuggest';
-import InputBase from '@mui/material/InputBase';
+
 import IconButton from '@mui/material/IconButton';
 import SearchIcon from '@mui/icons-material/Search';
 import Button from '@mui/material/Button';
@@ -13,8 +13,7 @@ export default function Search({ searchTerm, handleBasicSearchChange, performSea
 
   // Cargar los datos del archivo JSON local (ajusta la ruta según tu estructura de archivos)
   useEffect(() => {
-    fetch('/src/data/Cars.json')
- // Ruta al archivo JSON local
+    fetch('/src/data/Cars.json') // Ruta al archivo JSON local
       .then((response) => response.json())
       .then((data) => {
         setAutos(data);
@@ -51,6 +50,11 @@ export default function Search({ searchTerm, handleBasicSearchChange, performSea
     performSearch();
   };
 
+  const handleClearClick = () => {
+    // Borra el contenido del campo de búsqueda cuando se hace clic en "Clear"
+    setValue('');
+  };
+
   const inputProps = {
     placeholder: 'Search Car',
     value,
@@ -68,10 +72,10 @@ export default function Search({ searchTerm, handleBasicSearchChange, performSea
         inputProps={inputProps}
       />
 
-      <Button disabled>Clear</Button>
+      <Button onClick={handleClearClick}>Clear</Button>
 
       {/* Maneja la búsqueda cuando se hace clic en el botón */}
-      <IconButton type="button" aria-label="search" onClick={handleSearchClick}>
+      <IconButton aria-label="search" onClick={handleSearchClick}>
         <SearchIcon />
       </IconButton>
     </Paper>
